@@ -216,7 +216,9 @@ The format of the indexURI:
                 continue
             try:
                 # TODO: Implement 'cache', for when the network is not available
+                logger.plain('  ------------------------- cooker 10')
                 indexEnt = plugin.load_index(indexURI, load)
+                logger.plain('  ------------------------- cooker 11')
                 break
             except LayerIndexPluginUrlError as e:
                 logger.debug("%s doesn't support %s" % (plugin.type, e.url))
