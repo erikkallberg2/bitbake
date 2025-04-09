@@ -210,7 +210,7 @@ class CookerPlugin(layerindexlib.plugin.IndexPlugin):
                         depLayerBranch = index.find_collection(dep, branches=[branchName])
                         if not depLayerBranch:
                             # Missing dependency?!
-                            logger.error('Missing dependency %s (%s)' % (dep, branchName))
+                            logger.warning('Missing dependency %s (%s)' % (dep, branchName))
                             continue
 
                         # We assume that the oplist matches...
