@@ -170,7 +170,12 @@ class LayerIndexPlugin(ActionPlugin):
                 if dep.required:
                     requiredby.append(dep.layer.name)
                 else:
-                    recommendedby.append(dep.layer.name)
+                    if args.skip_recommends:
+                        logger.plain('  ---------------> Skip %s' % deplayerbranch)
+                        ignore_layers.append(deplayerbranch)
+                    else:
+                        logger.plain('  ---------------> Add %s' % args.layername)
+                        recommendedby.append(dep.layer.name)
 
             logger.plain('%s %s %s' % (("%s:%s:%s" %
                                   (layerBranch.index.config['DESCRIPTION'],
@@ -183,7 +188,13 @@ class LayerIndexPlugin(ActionPlugin):
             if requiredby:
                 logger.plain('  required by: %s' % ' '.join(requiredby))
             if recommendedby:
-                logger.plain('  recommended by: %s' % ' '.join(recommendedby))
+                if not args.skip_recommends:
+                    logger.plain('  recommended by: %s' % ' '.join(recommendedby))
+
+        # Recalculate dependancies
+        if args.skip_recommends:
+           logger.plain('  ----------->>> tjo ignore_layers =  %s' % ignore_layers)
+           (dependencies, invalidnames) = lIndex.find_dependencies(names=args.layername, ignores=ignore_layers)
 
         if dependencies:
             if args.fetchdir:
@@ -240,6 +251,7 @@ class LayerIndexPlugin(ActionPlugin):
         args.ignore = []
         args.fetchdir = ""
         args.shallow = True
+        args.skip_recommends = False
         self.do_layerindex_fetch(args)
 
     def register_commands(self, sp):
@@ -249,6 +261,7 @@ class LayerIndexPlugin(ActionPlugin):
         parser_layerindex_fetch.add_argument('-s', '--shallow', help='do only shallow clones (--depth=1)', action='store_true')
         parser_layerindex_fetch.add_argument('-i', '--ignore', help='assume the specified layers do not need to be fetched/added (separate multiple layers with commas, no spaces)', metavar='LAYER')
         parser_layerindex_fetch.add_argument('-f', '--fetchdir', help='directory to fetch the layer(s) into (will be created if it does not exist)')
+        parser_layerindex_fetch.add_argument('-r', '--skip-recommends', help='skip fetching recommended layers', action='store_true')
         parser_layerindex_fetch.add_argument('layername', nargs='+', help='layer to fetch')
 
         parser_layerindex_show_depends = self.add_command(sp, 'layerindex-show-depends', self.do_layerindex_show_depends, parserecipes=False)
